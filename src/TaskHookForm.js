@@ -1,17 +1,33 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { nanoid } from "nanoid";
+import { notify } from "./App";
 
-export default function TaskHookForm(props) {
-  const { kisiler } = props;
+export default function TaskHookForm({ kisiler, submitFn }) {
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
+    reset,
   } = useForm({
     mode: "onChange",
+    defaultValues: {
+      title: "",
+      description: "",
+      people: [],
+    },
   });
 
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = (data) => {
+    console.log(data);
+    submitFn({
+      ...data,
+      id: nanoid(5),
+      status: "yapılacak",
+    });
+    reset();
+    notify("Task Eklendi");
+  };
 
   return (
     <div>
@@ -73,9 +89,10 @@ export default function TaskHookForm(props) {
                   value={p}
                   {...register("people", {
                     required: "Lütfen en az bir kişi seçin",
-                    maxLength: {
-                      value: 3,
-                      message: "En fazla 3 kişi seçebilirsiniz",
+                    validate: {
+                      maxLimit: (kisiler) =>
+                        kisiler.length <= 3 ||
+                        "En fazla 3 kişi seçebilirsiniz.",
                     },
                   })}
                   //onChange={handleCheckboxChange}
